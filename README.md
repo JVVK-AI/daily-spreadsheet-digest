@@ -26,3 +26,6 @@ This template runs inside the owner’s Google account and uses its Apps Script 
 ## Custom work
 
 If a team needs a different source, schedule, matching rule, approval step, or delivery channel, that requires a separately scoped implementation in the team’s own accounts.
+## n8n variant — self-built synthetic example
+
+[`n8n/daily-spreadsheet-digest.workflow.json`](n8n/daily-spreadsheet-digest.workflow.json) is an importable n8n variant of the same narrow pattern: select same-day rows, format a safe HTML table, and hand it to a Gmail send node. It contains synthetic rows and no credentials, schedule, or live trigger. Its formatting logic has local synthetic checks; owners must connect their own source and Gmail credential in their own n8n instance.

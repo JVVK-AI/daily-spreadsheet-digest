@@ -1,0 +1,62 @@
+{
+  "name": "Daily Spreadsheet Digest — synthetic example",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "manual-trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "report-date", "name": "reportDate", "value": "2026-09-28", "type": "string" },
+            { "id": "recipient", "name": "recipient", "value": "owner@example.com", "type": "string" },
+            { "id": "rows", "name": "rows", "value": "=[{\"Date\":\"2026-09-28\",\"Vendor\":\"A&B Supply\",\"Quote\":\"$120\",\"Status\":\"Open\"},{\"Date\":\"2026-09-28\",\"Vendor\":\"<Example>\",\"Quote\":\"$45\",\"Status\":\"Awaiting approval\"},{\"Date\":\"2026-09-27\",\"Vendor\":\"Old row\",\"Quote\":\"$20\",\"Status\":\"Closed\"}]", "type": "array" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "example-input",
+      "name": "Synthetic daily rows",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [220, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "const { reportDate, recipient, rows } = items[0].json;\nif (!/^\\d{4}-\\d{2}-\\d{2}$/.test(reportDate || '')) throw new Error('reportDate must be YYYY-MM-DD');\nif (!recipient || !recipient.includes('@')) throw new Error('recipient must be an email address');\nif (!Array.isArray(rows)) throw new Error('rows must be an array');\nconst matching = rows.filter((row) => String(row.Date || '') === reportDate);\nconst escape = (value) => String(value ?? '').replace(/[&<>\"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;', \"'\": '&#39;' }[char]));\nconst columns = ['Vendor', 'Quote', 'Status'];\nconst header = columns.map((column) => `<th>${escape(column)}</th>`).join('');\nconst body = matching.length ? matching.map((row) => `<tr>${columns.map((column) => `<td>${escape(row[column])}</td>`).join('')}</tr>`).join('') : `<tr><td colspan=\"${columns.length}\">No rows matched ${escape(reportDate)}.</td></tr>`;\nreturn [{ json: { to: recipient, subject: `Daily spreadsheet digest — ${reportDate}`, emailType: 'html', message: `<h1>Daily spreadsheet digest</h1><p>Rows dated ${escape(reportDate)}: ${matching.length}</p><table border=\"1\" cellpadding=\"6\" cellspacing=\"0\"><thead><tr>${header}</tr></thead><tbody>${body}</tbody></table>`, matchingRows: matching.length } }];"
+      },
+      "id": "format-digest",
+      "name": "Format digest",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 0]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.to }}",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.message }}",
+        "options": { "appendAttribution": false }
+      },
+      "id": "gmail-send",
+      "name": "Send digest email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [700, 0]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": { "main": [[{ "node": "Synthetic daily rows", "type": "main", "index": 0 }]] },
+    "Synthetic daily rows": { "main": [[{ "node": "Format digest", "type": "main", "index": 0 }]] },
+    "Format digest": { "main": [[{ "node": "Send digest email", "type": "main", "index": 0 }]] }
+  },
+  "pinData": {},
+  "meta": { "templateCredsSetupCompleted": false },
+  "settings": {},
+  "versionId": "self-built-synthetic-example-v1"
+}
