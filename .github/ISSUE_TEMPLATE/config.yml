@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Daily Spreadsheet Digest setup guide
+    url: https://github.com/JVVK-AI/daily-spreadsheet-digest#setup
+    about: Start with the self-service setup guide if the standard template fits your use case.
