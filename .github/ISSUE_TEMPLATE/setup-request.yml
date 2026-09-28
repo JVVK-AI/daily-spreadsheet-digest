@@ -1,5 +1,5 @@
 name: Request a scoped setup
-about: Describe a possible paid setup or customization for Daily Spreadsheet Digest.
+description: Describe a possible paid setup or customization for Daily Spreadsheet Digest.
 title: "Setup request: "
 labels: ["setup-request"]
 body:
@@ -45,3 +45,4 @@ body:
           required: true
         - label: I understand that scope, price, access, and delivery must be agreed separately before any work begins.
           required: true
+
